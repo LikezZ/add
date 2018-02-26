@@ -8,3 +8,4 @@
 *.csproj
 *.suo
 /Pro/Assets/StreamingAssets/build_info.txt
+/Pro/Assets/StreamingAssets/build_info.txt.meta
