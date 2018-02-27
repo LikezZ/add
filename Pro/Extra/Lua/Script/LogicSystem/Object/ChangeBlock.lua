@@ -30,7 +30,7 @@ function ChangeBlock:OnClick()
 	-- 消除变身
 	--self:OnChange();
 	-- 扣减步数
-	--GameLogic:SubSteps();
+	GameLogic:SubSteps();
 
 	GameLogic:CheckEliminate(self);
 end

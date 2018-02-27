@@ -30,7 +30,7 @@ function SuperBlock:OnClick()
 	-- 消除3X3
 	self:OnExplode();
 	-- 扣减步数
-	--GameLogic:SubSteps();
+	GameLogic:SubSteps();
 
 	GameLogic:CheckEliminate(self);
 end
