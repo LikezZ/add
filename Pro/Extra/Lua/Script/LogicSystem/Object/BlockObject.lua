@@ -123,11 +123,13 @@ end
 -- 被点击处理 （子类继承）
 function BlockObject:OnClick()
 	-- 显示隐藏
-	self:OnUnder();
+	--self:OnUnder();
 	-- 设置方块无效
-	GameLogic:RecycleBlock(self);
+	--GameLogic:RecycleBlock(self);
 	-- 扣减步数
-	GameLogic:SubSteps();
+	--GameLogic:SubSteps();
+
+	GameLogic:CheckEliminate(self);
 end
 
 -- 被消除处理 （子类继承）

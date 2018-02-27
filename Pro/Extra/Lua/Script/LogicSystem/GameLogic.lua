@@ -166,78 +166,64 @@ function GameLogic:CheckLack()
 end
 
 -- 检测消除算法
-function GameLogic:CheckEliminate()
+function GameLogic:CheckEliminate(obj)
 	-- 刷新二维数组（移动停止时已经刷新）
 	--self:CheckArray();
 	-- 所有可消除列表
 	local list = {};
 	-- 是否有可消除
-	local can = false;
+	local have = false;
 	-- 递归检测相邻是否相同
 	-- r 行的变化量 c 列的变化量
 	local function check_same(obj, r, c, record)
 		local temp = self:GetBlock(obj.mRow + r, obj.mColumn + c);
 		if temp and temp.mIsValid and temp.mMainType == obj.mMainType then
-			table.insert(record, temp);
-			check_same(temp, r, c, record);
-		else
-			return;
+			if not record.list[temp.mUniqueId] then
+				return temp;
+			end
 		end
+		return nil;
+	end
+	-- 检测所有相邻方块
+	local function check_all(obj, record)
+		record.list = record.list or {};
+		record.count = record.count or 0;
+		record.count = record.count + 1;
+		record.list[obj.mUniqueId] = obj;
+		-- 先横向
+		local temp = check_same(obj, 0, -1, record);
+		if temp then check_all(temp, record); end
+		temp = check_same(obj, 0, 1, record);
+		if temp then check_all(temp, record); end
+		-- 然后竖向
+		temp = check_same(obj, -1, 0, record);
+		if temp then check_all(temp, record); end
+		temp = check_same(obj, 1, 0, record);
+		if temp then check_all(temp, record); end
 	end
 	-- 开始遍历
-	for i=1,LogicDefine.Rows do
-		for j=1,LogicDefine.Columns do
-			local temp = self:GetBlock(i, j);
-			if temp and temp.mIsValid then
-				-- 检测元素的上下左右是否有连续的
-				-- 需要横向或竖向大于等于三个
-				-- 先横向
-				local horizontal = {};
-				check_same(temp, 0, -1, horizontal);
-				check_same(temp, 0, 1, horizontal);
-				-- 然后竖向
-				local vertical = {};
-				check_same(temp, -1, 0, vertical);
-				check_same(temp, 1, 0, vertical);
-				-- 如果大于等于2就可以消除因为要加上本身
-				if #horizontal > 1 then
-					can = true;
-					temp.mIsSign = true;
-					list[temp.mUniqueId] = temp;
-					for i=1,#horizontal do
-						horizontal[i].mIsSign = true;
-						list[horizontal[i].mUniqueId] = horizontal[i];
-					end
-				end
-				if #vertical > 1 then
-					can = true;
-					temp.mIsSign = true;
-					list[temp.mUniqueId] = temp;
-					for i=1,#vertical do
-						vertical[i].mIsSign = true;
-						list[vertical[i].mUniqueId] = vertical[i];
-					end
-				end
-			end
+	local record = {};
+	check_all(obj, record);
+	if record.count and record.count > 1 then
+		have = true;
+		list = record.list;
+		if record.count > 4 then
+			-- 暂定五连生成超级方块
+			obj:OnSuper();
 		end
 	end
 	-- 如果可以消除
-	if can then
+	if have then
 		-- 检测特殊组合
-		self:CheckFormation(list);
+		--self:CheckFormation(list);
 		-- 遍历可消除列表（消除优先级最高 如果在消除列表排除被炸等）
 		for k,v in pairs(list) do
 			if v and v.mIsValid then
 				v:OnEliminate();
 			end
 		end
-		self:CheckMove();
-	else
-		-- 添加空缺方块
-		if self:CheckLack() then
-			self:CheckMove();
-		end
 	end
+	self:CheckMove();
 end
 
 -- 检测可消除方块的列表组成的特殊组合
@@ -416,7 +402,12 @@ function GameLogic:Update()
 		end
 		-- 检测碰撞等
 		if not self.mIsCheck then
-			self:CheckEliminate();
+			--self:CheckEliminate();
+
+			-- 添加空缺方块
+			if self:CheckLack() then
+				self:CheckMove();
+			end
 		end
 		-- TODO 其他逻辑
 
@@ -464,7 +455,8 @@ end
 
 -- 获取随机基础类型方块
 function GameLogic:GetRandomBlock(row, column, utype)
-	local stype = math.random(6) - 1;
+	-- 临时修改5种
+	local stype = math.random(5) - 1;
 	return self:CreateBlock(stype, row, column, utype);
 end
 
