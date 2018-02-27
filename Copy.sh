@@ -2,10 +2,10 @@
 
 echo "开始Copy资源"
 
-/Users/like/Desktop/new/Build.sh
+/Users/like/Desktop/add/Build.sh
 
-FROM=/Users/like/Desktop/new/Pro/Assets/StreamingAssets/
-TO=/Users/like/Desktop/new/Pro/iOS/Data/Raw/
+FROM=/Users/like/Desktop/add/Pro/Assets/StreamingAssets/
+TO=/Users/like/Desktop/add/Pro/iOS/Data/Raw/
 
 cp -rf $FROM $TO  
 
