@@ -47,7 +47,7 @@ function GameLogic:Init()
 	for i=1,count do
 		-- 换算方块坐标
 		local x = (i - 1) % LogicDefine.Columns;
-		local y =  (i - 1 + LogicDefine.Rows - (i - 1) % LogicDefine.Rows) / LogicDefine.Rows - 1;
+		local y = math.floor((i - 1) / LogicDefine.Columns);
 		-- 换算方块行列 Row = y + 1, Column = x + 1
 		local row, column = y + 1, x + 1;
 		local temp = self:GetIndexBlock(row, column)--self:GetRandomBlock(row, column);

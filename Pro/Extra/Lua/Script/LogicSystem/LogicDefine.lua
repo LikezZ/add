@@ -15,7 +15,7 @@ LogicDefine.Dir = {
 LogicDefine.Cell = 0.8;
 
 -- 游戏行列数
-LogicDefine.Rows = 8; 
+LogicDefine.Rows = 9; 
 LogicDefine.Columns = 8;
 
 -- 对象主类型 ObjectMainType
