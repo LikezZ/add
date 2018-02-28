@@ -172,7 +172,7 @@ function GameLogic:CheckEliminate(obj)
 	-- 所有可消除列表
 	local list = {};
 	-- 是否有可消除
-	local have = false;
+	local todo = false;
 	-- 递归检测相邻是否相同
 	-- r 行的变化量 c 列的变化量
 	local function check_same(obj, r, c, record)
@@ -205,7 +205,7 @@ function GameLogic:CheckEliminate(obj)
 	local record = {};
 	check_all(obj, record);
 	if record.count and record.count > 1 then
-		have = true;
+		todo = true;
 		list = record.list;
 		if record.count > 4 then
 			-- 暂定五连生成超级方块
@@ -213,9 +213,7 @@ function GameLogic:CheckEliminate(obj)
 		end
 	end
 	-- 如果可以消除
-	if have then
-		-- 检测特殊组合
-		--self:CheckFormation(list);
+	if todo then
 		-- 遍历可消除列表（消除优先级最高 如果在消除列表排除被炸等）
 		for k,v in pairs(list) do
 			if v and v.mIsValid then
@@ -224,122 +222,7 @@ function GameLogic:CheckEliminate(obj)
 		end
 	end
 	self:CheckMove();
-end
-
--- 检测可消除方块的列表组成的特殊组合
-function GameLogic:CheckFormation(list)
-	-- 记录特殊组合的方块 过滤重复
-	local record = {};
-	-- 消除列表转换二维数组
-	local array = {};
-	for k,v in pairs(list) do
-		if v and v.mIsValid then
-			array[v.mRow] = array[v.mRow] or {};
-			array[v.mRow][v.mColumn] = v;
-		end
-	end
-	local function get_value(row, column)
-		local temp = array[row];
-		if temp then
-			return temp[column];
-		end
-		return temp;
-	end
-	-- 基本检测
-	local function check_value(value, formation)
-		local cache = {};
-		for i=1,#formation do
-			local info = formation[i];
-			local temp = get_value(info[1] + value.mRow, info[2] + value.mColumn);
-			if temp and temp.mMainType == value.mMainType and not record[temp.mUniqueId] then
-				cache[temp.mUniqueId] = temp;
-			else
-				return false;
-			end
-		end
-		for k,v in pairs(cache) do
-			record[v.mUniqueId] = v;
-		end
-		record[value.mUniqueId] = value;
-		return true;
-	end
-	-- 检测是否有五连
-	local function check_five(value)
-		-- 之所以每一个分开写 可能有的以后会特殊处理
-		local have = check_value(value, LogicDefine.Formation1);
-		if not have then
-			have = check_value(value, LogicDefine.Formation2);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation3);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation4);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation5);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation6);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation7);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation8);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation9);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation10);
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation11);
-		end
-		return have;
-	end
-	-- 检测是否有四连
-	local function check_four(value)
-		-- 之所以每一个分开写 可能有的以后会特殊处理
-		local have = check_value(value, LogicDefine.Formation12);
-		if have then
-			-- 清除对应列
-			for i=1,LogicDefine.Rows do
-				local temp = self:GetBlock(i, value.mColumn);
-				if temp and temp.mIsValid and not temp.mIsSign then
-					temp:OnEliminate();
-				end
-			end
-		end
-		if not have then
-			have = check_value(value, LogicDefine.Formation13);
-			if have then
-				-- 清除对应行
-				for i=1,LogicDefine.Columns do
-					local temp = self:GetBlock(value.mRow, i);
-					if temp and temp.mIsValid and not temp.mIsSign then
-						temp:OnEliminate();
-					end
-				end
-			end
-		end
-		return have;
-	end
-	-- 遍历检测
-	-- 先遍历是否有五连
-	for k,v in pairs(list) do
-		if not record[v.mUniqueId] and check_five(v) then
-			-- 暂定五连生成超级方块
-			v:OnSuper();
-		end
-	end
-	-- 然后遍历四连
-	for k,v in pairs(list) do
-		if not record[v.mUniqueId] and check_four(v) then
-			-- 暂定四连清对应行或对应列
-		end
-	end
+	return todo;
 end
 
 -- 转换二维数组 检测消除时使用

@@ -28,11 +28,9 @@ end
 -- 被点击处理 
 function ChangeBlock:OnClick()
 	-- 消除变身
-	--self:OnChange();
+	self:OnChange();
 	-- 扣减步数
 	GameLogic:SubSteps();
-
-	GameLogic:CheckEliminate(self);
 end
 
 -- 被消除处理 

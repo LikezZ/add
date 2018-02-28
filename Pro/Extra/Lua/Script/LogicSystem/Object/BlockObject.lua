@@ -126,10 +126,11 @@ function BlockObject:OnClick()
 	--self:OnUnder();
 	-- 设置方块无效
 	--GameLogic:RecycleBlock(self);
-	-- 扣减步数
-	GameLogic:SubSteps();
 
-	GameLogic:CheckEliminate(self);
+	if GameLogic:CheckEliminate(self) then
+		-- 扣减步数
+		GameLogic:SubSteps();
+	end
 end
 
 -- 被消除处理 （子类继承）
