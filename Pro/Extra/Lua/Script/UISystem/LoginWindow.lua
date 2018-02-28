@@ -45,7 +45,7 @@ function LoginWindow:Load()
 			--SceneManager:ChangeScene("SkyScene");
 			--SceneManager:ChangeScene("BallTestScene");
 			--SceneManager:ChangeScene("BlockScene");
-			StageLogic:StartStage(1);
+			StageLogic:StartStage(2);
 		end
 		UIEventTrigger.Get(btn).onClick = OnChangeScene;
 	end
