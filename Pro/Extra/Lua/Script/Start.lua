@@ -64,10 +64,11 @@ end
 
 -- 初始化游戏管理器
 function App:Start()
-    
+    -- 初始化随机种子
+    math.randomseed(os.time());
+
     -- 注册全局定时器
     App.mAppTimer = import("Script.Common.ITimer").new();
-
     UpdateBeat:Add(App.Update);
     FixedUpdateBeat:Add(App.FixedUpdate);
 

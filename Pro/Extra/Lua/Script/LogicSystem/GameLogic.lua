@@ -455,8 +455,7 @@ end
 
 -- 获取随机基础类型方块
 function GameLogic:GetRandomBlock(row, column, utype)
-	-- 临时修改5种
-	local stype = math.random(5) - 1;
+	local stype = math.random(6) - 1;
 	return self:CreateBlock(stype, row, column, utype);
 end
 
