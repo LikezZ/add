@@ -28,7 +28,7 @@ end
 -- 被点击处理 
 function ChangeBlock:OnClick()
 	-- 消除变身
-	self:OnChange();
+	self:OnEliminate();
 	-- 扣减步数
 	GameLogic:SubSteps();
 end
@@ -43,8 +43,7 @@ end
 
 -- 旁边消除被影响处理 
 function ChangeBlock:OnAffect()
-	-- 消除变身
-	--self:OnChange();
+	
 end
 
 -- 生成超级方块 

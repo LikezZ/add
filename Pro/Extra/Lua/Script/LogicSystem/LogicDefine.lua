@@ -11,9 +11,6 @@ LogicDefine.Dir = {
 	Down = 3,
 }
 
--- 单元间距
-LogicDefine.Cell = 0.8;
-
 -- 游戏行列数
 LogicDefine.Rows = 9; 
 LogicDefine.Columns = 8;
@@ -71,20 +68,3 @@ LogicDefine.Velocity = 10;
 -- 检测是否移动的帧数
 -- 应该等于最多的行列数减一
 LogicDefine.MoveFrame = 8; 
-
--- 定义方块特殊组合 以中心点方块参照
--- 五连方块
-LogicDefine.Formation1 = {{0,1},{0,2},{0,-1},{0,-2}};
-LogicDefine.Formation2 = {{1,0},{2,0},{-1,0},{-2,0}};
-LogicDefine.Formation3 = {{1,0},{-1,0},{0,1},{0,-1}};
-LogicDefine.Formation4 = {{0,1},{0,-1},{-1,0},{-2,0}};
-LogicDefine.Formation5 = {{0,1},{0,-1},{1,0},{2,0}};
-LogicDefine.Formation6 = {{1,0},{-1,0},{0,-1},{0,-2}};
-LogicDefine.Formation7 = {{1,0},{-1,0},{0,1},{0,2}};
-LogicDefine.Formation8 = {{1,0},{2,0},{0,-1},{0,-2}};
-LogicDefine.Formation9 = {{1,0},{2,0},{0,1},{0,2}};
-LogicDefine.Formation10 = {{-1,0},{-2,0},{0,-1},{0,-2}};
-LogicDefine.Formation11 = {{-1,0},{-2,0},{0,1},{0,2}};
--- 四连方块 以最左或最下参照
-LogicDefine.Formation12 = {{1,0},{2,0},{3,0}};  -- 竖
-LogicDefine.Formation13 = {{0,1},{0,2},{0,3}};  -- 横

@@ -27,12 +27,13 @@ end
 
 -- 被点击处理 
 function SuperBlock:OnClick()
-	-- 消除3X3
-	self:OnExplode();
+	-- 检测消除 如果没有消除直接消除自身
+	if not GameLogic:CheckEliminate(self) then
+		-- 爆炸消除3X3
+		self:OnEliminate();
+	end
 	-- 扣减步数
 	GameLogic:SubSteps();
-
-	GameLogic:CheckEliminate(self);
 end
 
 -- 被消除处理 
