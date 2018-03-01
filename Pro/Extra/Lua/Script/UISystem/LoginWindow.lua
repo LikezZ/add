@@ -38,13 +38,21 @@ function LoginWindow:Load()
 	LoginWindow.super.Load(self);
 
 	local btn = self:GetChild("Button");
-	if btn ~= nil then
+	if btn then
 		-- 切换场景
 		local function OnChangeScene(obj)
 			--SceneManager:ChangeScene("GameScene");
 			--SceneManager:ChangeScene("SkyScene");
 			--SceneManager:ChangeScene("BallTestScene");
 			--SceneManager:ChangeScene("BlockScene");
+			StageLogic:StartStage(1);
+		end
+		UIEventTrigger.Get(btn).onClick = OnChangeScene;
+	end
+	btn = self:GetChild("Ads");
+	if btn then
+		-- 切换场景
+		local function OnChangeScene(obj)
 			StageLogic:StartStage(2);
 		end
 		UIEventTrigger.Get(btn).onClick = OnChangeScene;

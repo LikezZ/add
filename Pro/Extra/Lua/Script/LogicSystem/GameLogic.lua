@@ -66,6 +66,7 @@ function GameLogic:Init()
 	if StageLogic.mStageInfo then
 		local script = StageLogic.mStageInfo.Script;
 		self.mGameHandle = import("Script.LogicSystem.Stage."..script).new();
+		self.mGameHandle:Awake();
 	end
 
 	-- self.mOnTimer = function ()

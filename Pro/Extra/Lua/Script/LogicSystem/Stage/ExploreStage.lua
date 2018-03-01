@@ -5,16 +5,14 @@ local ExploreStage = class("ExploreStage", IStage)
 function ExploreStage:ctor()
 	ExploreStage.super.ctor(self);
 
+	self.mMaxRow = 0;    -- 记录最大行数
 end
 
 -- 脚本挂载事件
 function ExploreStage:Awake()
 	ExploreStage.super.Awake(self);
-end
 
--- 脚本运行事件
-function ExploreStage:Start()
-	ExploreStage.super.Start(self);
+	self.mMaxRow = LogicDefine.Rows;
 end
 
 -- 脚本更新事件
@@ -34,9 +32,7 @@ function ExploreStage:EndCheck()
 	ExploreStage.super.EndCheck(self);
 
 	-- 添加空缺方块
-	if self:CheckLack() then
-		GameLogic:CheckMove();
-	end
+	self:CheckLack();
 end
 
 -- 是否可点击处理（子类继承）
@@ -56,66 +52,43 @@ function ExploreStage:CheckLack()
 	-- 刷新二维数组（移动停止时已经刷新）
 	--self:CheckArray();
 	local list = {};
-	-- 根据方向检测缺少
-	if GameLogic.mMoveDir == LogicDefine.Dir.Up then
+	-- 检测是否缺少行数
+	local function check_row(row)
 		for i=1,LogicDefine.Columns do
-			local k = 1;
-			for j=1,LogicDefine.Rows do
-				local temp = GameLogic:GetBlock(j, i);
-				-- 遍历到第一个不为空
-				if temp then
-					break;
-				else
-					-- 记录缺少
-					k = k - 1;
-					table.insert(list, {k, i});
-				end
-			end
+			local temp = GameLogic:GetBlock(row, i);
+			if temp then return false; end
 		end
-	elseif GameLogic.mMoveDir == LogicDefine.Dir.Down then
-		for i=1,LogicDefine.Columns do
-			local k = LogicDefine.Rows;
-			for j=LogicDefine.Rows,1,-1 do
-				local temp = GameLogic:GetBlock(j, i);
-				if temp then
-					break;
-				else
-					k = k + 1;
-					table.insert(list, {k, i});
-				end
-			end
+		return true;
+	end
+	local row = self.mMaxRow;
+	for i=self.mMaxRow,self.mMaxRow-LogicDefine.Rows,-1 do
+		if not check_row(i) then
+			row = i;
+			break;
 		end
-	elseif GameLogic.mMoveDir == LogicDefine.Dir.Left then
-		for i=1,LogicDefine.Rows do
-			local k = LogicDefine.Columns;
-			for j=LogicDefine.Columns,1,-1 do
-				local temp = GameLogic:GetBlock(i, j);
-				if temp then
-					break;
-				else
-					k = k + 1;
-					table.insert(list, {i, k});
-				end
-			end
-		end
-	elseif GameLogic.mMoveDir == LogicDefine.Dir.Right then
-		for i=1,LogicDefine.Rows do
-			local k = 1;
+	end
+	if row < self.mMaxRow then
+		lack = true;
+		local num = self.mMaxRow - row;
+		-- 设置阻挡位移
+		local pos = Helper:GetLocalPosition(GameLogic.mObst[LogicDefine.Dir.Up]);
+		pos.y = pos.y - num;
+		Helper:SetLocalPosition(GameLogic.mObst[LogicDefine.Dir.Up], pos);
+		local camera = UnityEngine.GameObject.FindWithTag("MainCamera");
+		pos = Helper:GetLocalPosition(camera);
+		pos.y = pos.y - num;
+		Helper:SetLocalPosition(camera, pos);
+		for i=1,num do
 			for j=1,LogicDefine.Columns do
-				local temp = GameLogic:GetBlock(i, j);
-				if temp then
-					break;
-				else
-					k = k - 1;
-					table.insert(list, {i, k});
-				end
+				table.insert(list, {self.mMaxRow-LogicDefine.Rows-i+1, j});		
 			end
 		end
+		
+		self.mMaxRow = row;
 	end
 	for i=1,#list do
 		local row, column = list[i][1], list[i][2];
 		local temp = StageLogic:GetIndexBlock(row, column);
-		lack = true;
 	end
 	return lack;
 end
