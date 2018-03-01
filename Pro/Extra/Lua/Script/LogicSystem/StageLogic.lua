@@ -13,6 +13,11 @@ StageLogic.mSteps = 1;
 -- 消除个数记录
 StageLogic.mCount = 0;
 
+-- 数据表的id索引
+StageLogic.mBlockIndex = 1;
+-- 数据表的id统计数
+StageLogic.mBlockCount = 1;
+
 -- 初始化lua 
 function StageLogic:Init()
 	
@@ -29,8 +34,7 @@ end
 
 -- 销毁
 function StageLogic:Destroy()
-	App:UnRegisterTimer(self.mOnTimer);
-
+	--App:UnRegisterTimer(self.mOnTimer);
 end
 
 -- 定时
@@ -50,6 +54,8 @@ end
 function StageLogic:ChangePart(index)
 	local item = DataManager.Data.Stage:GetDataByKey(index);
 	if item then
+		self.mBlockIndex = 1;
+		self.mBlockCount = 1;
 		self.mStageInfo = item;
 		self.mPartInfo = DataManager:GetData(item.DataName);
 		SceneManager:ChangeScene(item.SceneName);
@@ -96,5 +102,40 @@ function StageLogic:SubSteps()
 		-- 事件
 		EventSystem:PushEvent(SysEvent._TYPED_EVENT_BLOCKWINDOW_UPDATE_);
 		return true;
+	end
+end
+
+-- 获取数据表对象
+function StageLogic:GetIndexBlock(row, column)
+	local item = self:GetPartBlock(self.mBlockIndex);
+	if self.mBlockIndex ~= self.mBlockCount then
+		local temp = self:GetPartBlock(self.mBlockCount);
+		if temp then 
+			self.mBlockIndex = self.mBlockCount;
+			item = temp; 
+		end
+	end
+	self.mBlockIndex = self.mBlockIndex + 1;
+	self.mBlockCount = self.mBlockCount + 1;
+	if item then
+		if item.JumpIndex > 0 then
+			self.mBlockIndex = item.JumpIndex;
+		end
+		local temp, utype = nil, -1;
+		if item.UnderRandom == -1 then
+			utype = item.UnderType;
+		elseif item.UnderRandom == 1 then
+			local str = Helper:SplitString(item.UnderPool, '|');
+			utype = tonumber(str[math.random(#str)]);
+		end
+		if item.RandomType == -1 then
+			temp = GameLogic:CreateBlock(item.SecondaryType, row, column, utype);
+		elseif item.RandomType == 0 then
+			temp = GameLogic:GetRandomBlock(row, column, utype);
+		elseif item.RandomType == 1 then
+			local str = Helper:SplitString(item.RandomPool, '|');
+			temp = GameLogic:CreateBlock(tonumber(str[math.random(#str)]), row, column, utype);
+		end
+		return temp;
 	end
 end

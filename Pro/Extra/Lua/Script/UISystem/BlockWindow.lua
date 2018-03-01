@@ -61,9 +61,8 @@ function BlockWindow:Load()
 				if obj then
 					obj = obj:GetLuaObject();
 					if obj and obj.mIsValid then
-						if StageLogic.mSteps > 0 then
+						if GameLogic:AbleClick() then
 							obj:OnClick();
-							--GameLogic:CheckMove();
 						else
 							-- 没有步数暂时返回开始界面
 							SceneManager:ChangeScene("LoginScene");

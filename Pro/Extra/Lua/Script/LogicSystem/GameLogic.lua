@@ -19,6 +19,8 @@ GameLogic.mIsCheck = false;
 GameLogic.mIsLogic = false;
 -- 移动方向记录
 GameLogic.mMoveDir = LogicDefine.Dir.Down;
+-- 关卡逻辑处理对象
+GameLogic.mGameHandle = nil;
 
 -- 场景根节点对象
 GameLogic.mRoot = nil;
@@ -50,7 +52,7 @@ function GameLogic:Init()
 		local y = math.floor((i - 1) / LogicDefine.Columns);
 		-- 换算方块行列 Row = y + 1, Column = x + 1
 		local row, column = y + 1, x + 1;
-		local temp = self:GetIndexBlock(row, column)--self:GetRandomBlock(row, column);
+		local temp = StageLogic:GetIndexBlock(row, column)--self:GetRandomBlock(row, column);
 		-- 创建方块背景
 		self:CreateObject("Back", function (obj)
 			Helper:SetLocalPositionXYZ(obj, x, y, 1);
@@ -58,8 +60,10 @@ function GameLogic:Init()
 	end
 	-- 初始方向
 	self:SetDir(LogicDefine.Dir.Down);
-	-- 检测消除
-	self:CheckMove();
+	-- 初始化二维数组
+	self:CheckArray();
+	-- 初始化逻辑处理
+	self.mGameHandle = import("Script.LogicSystem.Stage.".."ExploreStage").new();
 
 	-- self.mOnTimer = function ()
 	-- 	self:OnTimerFunc();
@@ -92,77 +96,6 @@ function GameLogic:CheckMove()
 			v:CheckMove();
 		end
 	end
-end
-
--- 检测空缺方块 返回是否有缺少
-function GameLogic:CheckLack()
-	-- 是否有缺少
-	local lack = false;
-	-- 刷新二维数组（移动停止时已经刷新）
-	--self:CheckArray();
-	local list = {};
-	-- 根据方向检测缺少
-	if self.mMoveDir == LogicDefine.Dir.Up then
-		for i=1,LogicDefine.Columns do
-			local k = 1;
-			for j=1,LogicDefine.Rows do
-				local temp = self:GetBlock(j, i);
-				-- 遍历到第一个不为空
-				if temp then
-					break;
-				else
-					-- 记录缺少
-					k = k - 1;
-					table.insert(list, {k, i});
-				end
-			end
-		end
-	elseif self.mMoveDir == LogicDefine.Dir.Down then
-		for i=1,LogicDefine.Columns do
-			local k = LogicDefine.Rows;
-			for j=LogicDefine.Rows,1,-1 do
-				local temp = self:GetBlock(j, i);
-				if temp then
-					break;
-				else
-					k = k + 1;
-					table.insert(list, {k, i});
-				end
-			end
-		end
-	elseif self.mMoveDir == LogicDefine.Dir.Left then
-		for i=1,LogicDefine.Rows do
-			local k = LogicDefine.Columns;
-			for j=LogicDefine.Columns,1,-1 do
-				local temp = self:GetBlock(i, j);
-				if temp then
-					break;
-				else
-					k = k + 1;
-					table.insert(list, {i, k});
-				end
-			end
-		end
-	elseif self.mMoveDir == LogicDefine.Dir.Right then
-		for i=1,LogicDefine.Rows do
-			local k = 1;
-			for j=1,LogicDefine.Columns do
-				local temp = self:GetBlock(i, j);
-				if temp then
-					break;
-				else
-					k = k - 1;
-					table.insert(list, {i, k});
-				end
-			end
-		end
-	end
-	for i=1,#list do
-		local row, column = list[i][1], list[i][2];
-		local temp = self:GetIndexBlock(row, column)--self:GetRandomBlock(row, column);
-		lack = true;
-	end
-	return lack;
 end
 
 -- 检测消除算法
@@ -285,21 +218,25 @@ function GameLogic:Update()
 		end
 		-- 检测碰撞等
 		if not self.mIsCheck then
-			--self:CheckEliminate();
-
-			-- 添加空缺方块
-			if self:CheckLack() then
-				self:CheckMove();
+			if self.mGameHandle then
+				self.mGameHandle:EndCheck();
 			end
 		end
 		-- TODO 其他逻辑
-
+	end
+	-- 刷新
+	if self.mGameHandle then
+		self.mGameHandle:Update();
 	end
 end
 
 -- 销毁
 function GameLogic:Destroy()
 	App:UnRegisterTimer(self.mOnTimer);
+
+	if self.mGameHandle then
+		self.mGameHandle:Destroy();
+	end
 
 	self.mUniqueId = 0;
 	self.mOnTimer = nil;
@@ -308,16 +245,22 @@ function GameLogic:Destroy()
 	self.mUnusedList = {};
 	self.mIsCheck = false;
 	self.mIsLogic = false;
+	self.mGameHandle = nil;
 	self.mRoot = nil;
 	self.mObst = {};
-
-	self.mBlockIndex = 1;
-	self.mBlockCount = 1;
 end
 
 -- 定时
 function GameLogic:OnTimerFunc()
 	
+end
+
+-- 是否可点击处理
+function GameLogic:AbleClick()
+	if self.mGameHandle then
+		return self.mGameHandle:AbleClick();
+	end
+	return false;
 end
 
 -- 添加消除个数计算步数
@@ -400,45 +343,4 @@ function GameLogic:CreateObject(name, callback)
 	end
 	-- 开始加载
 	EngineSystem:LoadModel(name, OnGameLogicResourceLoaded);
-end
-
--- 游戏stage数据与逻辑相关 -----------------------------------------
--- 数据表的id索引
-GameLogic.mBlockIndex = 1;
--- 数据表的id统计数
-GameLogic.mBlockCount = 1;
-
--- 获取数据表对象
-function GameLogic:GetIndexBlock(row, column)
-	local item = StageLogic:GetPartBlock(self.mBlockIndex);
-	if self.mBlockIndex ~= self.mBlockCount then
-		local temp = StageLogic:GetPartBlock(self.mBlockCount);
-		if temp then 
-			self.mBlockIndex = self.mBlockCount;
-			item = temp; 
-		end
-	end
-	self.mBlockIndex = self.mBlockIndex + 1;
-	self.mBlockCount = self.mBlockCount + 1;
-	if item then
-		if item.JumpIndex > 0 then
-			self.mBlockIndex = item.JumpIndex;
-		end
-		local temp, utype = nil, -1;
-		if item.UnderRandom == -1 then
-			utype = item.UnderType;
-		elseif item.UnderRandom == 1 then
-			local str = Helper:SplitString(item.UnderPool, '|');
-			utype = tonumber(str[math.random(#str)]);
-		end
-		if item.RandomType == -1 then
-			temp = self:CreateBlock(item.SecondaryType, row, column, utype);
-		elseif item.RandomType == 0 then
-			temp = self:GetRandomBlock(row, column, utype);
-		elseif item.RandomType == 1 then
-			local str = Helper:SplitString(item.RandomPool, '|');
-			temp = self:CreateBlock(tonumber(str[math.random(#str)]), row, column, utype);
-		end
-		return temp;
-	end
 end
