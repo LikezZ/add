@@ -31,6 +31,7 @@ function SuperBlock:OnClick()
 	if not GameLogic:CheckEliminate(self) then
 		-- 爆炸消除3X3
 		self:OnEliminate();
+		GameLogic:CheckMove();
 	end
 	-- 扣减步数
 	GameLogic:SubSteps();

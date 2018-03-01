@@ -63,7 +63,10 @@ function GameLogic:Init()
 	-- 初始化二维数组
 	self:CheckArray();
 	-- 初始化逻辑处理
-	self.mGameHandle = import("Script.LogicSystem.Stage.".."ExploreStage").new();
+	if StageLogic.mStageInfo then
+		local script = StageLogic.mStageInfo.Script;
+		self.mGameHandle = import("Script.LogicSystem.Stage."..script).new();
+	end
 
 	-- self.mOnTimer = function ()
 	-- 	self:OnTimerFunc();
@@ -153,8 +156,8 @@ function GameLogic:CheckEliminate(obj)
 				v:OnEliminate();
 			end
 		end
+		self:CheckMove();
 	end
-	self:CheckMove();
 	return todo;
 end
 
